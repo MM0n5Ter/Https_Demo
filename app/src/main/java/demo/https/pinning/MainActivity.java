@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             String newURL = requestAddress.getText().toString().trim();
             if(newURL.length()==0) {newURL = defaultURL;}
             try{
-                URL url = new URL("https"+newURL);
+                URL url = new URL("https://"+newURL);
 
             } catch (Throwable e) {
                 Toast ero = Toast.makeText(getApplicationContext(), "出戳啦\n" + e.toString(),Toast.LENGTH_SHORT);
