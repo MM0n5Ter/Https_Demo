@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Https_Demo</string>
+    <string name="default_address">www.baidu.com</string>
 </resources>
