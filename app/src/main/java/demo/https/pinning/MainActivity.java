@@ -3,6 +3,7 @@ package demo.https.pinning;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -39,20 +40,29 @@ public class MainActivity extends AppCompatActivity {
     class btnSimpleClick implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            String newURL = requestAddress.getText().toString().trim();
-            if(newURL.length()==0) {newURL = defaultURL;}
-            try{
-                URL url = new URL("https://"+newURL);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-                int code = urlConnection.getResponseCode();
-                Toast ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code,Toast.LENGTH_SHORT);
-                ero.show();
-            } catch (Throwable e) {
-                Toast ero = Toast.makeText(getApplicationContext(), "出戳啦\n" + e.toString(),Toast.LENGTH_SHORT);
-                ero.show();
-            }
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Looper.prepare();
+                    String newURL = requestAddress.getText().toString().trim();
+                    if(newURL.length()==0) {newURL = defaultURL;}
+                    try{
+                        URL url = new URL("https://"+newURL);
+                        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                        urlConnection.setRequestMethod("GET");
+                        urlConnection.connect();
+                        int code = urlConnection.getResponseCode();
+                        Toast ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code,Toast.LENGTH_SHORT);
+                        ero.show();
+                    } catch (Throwable e) {
+                        Toast ero = Toast.makeText(getApplicationContext(), "出戳啦\n" + e.toString(),Toast.LENGTH_SHORT);
+                        ero.show();
+                    }
+                    Looper.loop();
+                }
+            }).start();
+            return;
+
         }
     }
 
