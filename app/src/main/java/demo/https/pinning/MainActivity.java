@@ -4,12 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.HttpURLConnection;
@@ -48,12 +50,26 @@ public class MainActivity extends AppCompatActivity {
                     if(newURL.length()==0) {newURL = defaultURL;}
                     try{
                         URL url = new URL("https://"+newURL);
-                        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                        urlConnection.setRequestMethod("GET");
-                        urlConnection.connect();
-                        int code = urlConnection.getResponseCode();
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setConnectTimeout(5000);
+                        conn.setRequestMethod("GET");
+                        int code = conn.getResponseCode();
                         Toast ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code,Toast.LENGTH_SHORT);
                         ero.show();
+
+                        if(code==200){
+                            InputStream inStream = conn.getInputStream();
+                            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+                            byte[] buffer = new byte[1024];
+                            int len = 0;
+                            while ((len = inStream.read(buffer)) != -1) {
+                                outStream.write(buffer, 0, len);
+                            }
+                            inStream.close();
+                            String res = new String(outStream.toByteArray(), "UTF-8");
+                            Log.d("GRAB", res);
+                        }
+
                     } catch (Throwable e) {
                         Toast ero = Toast.makeText(getApplicationContext(), "出戳啦\n" + e.toString(),Toast.LENGTH_SHORT);
                         ero.show();
