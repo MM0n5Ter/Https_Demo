@@ -62,17 +62,20 @@ public class MainActivity extends AppCompatActivity {
     class btnOkhttpClick implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            new Thread(() -> {
-                Looper.prepare();
-                int code = new HttpsRequest().CreateOkHttps(getURL());
-                Toast ero;
-                if(code!=-1){
-                    ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
-                }else{
-                    ero = Toast.makeText(getApplicationContext(), "出戳啦\n", Toast.LENGTH_SHORT);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Looper.prepare();
+                    int code = new HttpsRequest().CreateOkHttps(getURL());
+                    Toast ero;
+                    if(code!=-1){
+                        ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
+                    }else{
+                        ero = Toast.makeText(getApplicationContext(), "出戳啦\n", Toast.LENGTH_SHORT);
+                    }
+                    ero.show();
+                    Looper.loop();
                 }
-                ero.show();
-                Looper.loop();
             }).start();
         }
     }
