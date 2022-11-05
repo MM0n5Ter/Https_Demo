@@ -6,7 +6,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class HttpsRequest {
@@ -27,11 +31,26 @@ public class HttpsRequest {
                     outStream.write(buffer, 0, len);
                 }
                 inStream.close();
-                String res = new String(outStream.toByteArray(), "UTF-8");
+                String res = outStream.toString("UTF-8");
                 Log.d("GRAB", res);
             }
             return code;
         } catch (Throwable e) {
+            Log.e("ERROR", e.toString());
+            return -1;
+        }
+    }
+
+    public int CreateOkHttps(String path){
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .get().url("https://"+path).build();
+        try{
+            Response response = client.newCall(request).execute();
+            Log.d("GRAB", Objects.requireNonNull(response.body()).string());
+            Objects.requireNonNull(response.body()).close();
+            return response.code();
+        } catch (Throwable e){
             Log.e("ERROR", e.toString());
             return -1;
         }

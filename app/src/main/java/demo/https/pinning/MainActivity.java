@@ -1,6 +1,6 @@
 package demo.https.pinning;
 
-import demo.https.contact.HttpsRequest;
+import demo.https.contact.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -45,6 +45,12 @@ public class MainActivity extends AppCompatActivity {
         btnOKhttp.setOnClickListener(new btnOKhttpClick());
     }
 
+    protected String getURL(){
+        String newURL = requestAddress.getText().toString().trim();
+        if(newURL.length()==0) {return defaultURL;}
+        else {return newURL;}
+    }
+
     class btnSimpleClick implements View.OnClickListener {
         @Override
         public void onClick(View v) {
@@ -52,9 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     Looper.prepare();
-                    String newURL = requestAddress.getText().toString().trim();
-                    if(newURL.length()==0) {newURL = defaultURL;}
-                    int code = new HttpsRequest().CreateSimpleHttps(newURL);
+                    int code = new HttpsRequest().CreateSimpleHttps(getURL());
                     Toast ero;
                     if(code!=-1){
                         ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
@@ -72,34 +76,21 @@ public class MainActivity extends AppCompatActivity {
     class btnOKhttpClick implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-
-            String newURL = requestAddress.getText().toString().trim();
-            if(newURL.length()==0) {newURL = defaultURL;}
-
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder()
-                    .get().url("https://"+newURL).build();
-            Call call = client.newCall(request);
-            call.enqueue(new Callback() {
+            new Thread(new Runnable() {
                 @Override
-                public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    Log.d("GRAB", "onFailure: ");
+                public void run() {
                     Looper.prepare();
-                    Toast ero = Toast.makeText(getApplicationContext(), "出戳啦\n" + e.toString(),Toast.LENGTH_SHORT);
+                    int code = new HttpsRequest().CreateOkHttps(getURL());
+                    Toast ero;
+                    if(code!=-1){
+                        ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
+                    }else{
+                        ero = Toast.makeText(getApplicationContext(), "出戳啦\n", Toast.LENGTH_SHORT);
+                    }
                     ero.show();
                     Looper.loop();
                 }
-
-                @Override
-                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    Log.d("GRAB", "onResponse: " + response.body().string());
-                    Looper.prepare();
-                    Toast ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + response.code(),Toast.LENGTH_SHORT);
-                    ero.show();
-                    Looper.loop();
-                }
-            });
-
+            }).start();
         }
     }
 }
