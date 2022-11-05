@@ -1,5 +1,6 @@
 package demo.https.pinning;
 
+import demo.https.contact.HttpsRequest;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,11 +19,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.HttpURLConnection;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,32 +54,14 @@ public class MainActivity extends AppCompatActivity {
                     Looper.prepare();
                     String newURL = requestAddress.getText().toString().trim();
                     if(newURL.length()==0) {newURL = defaultURL;}
-                    try{
-                        URL url = new URL("https://"+newURL);
-                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                        conn.setConnectTimeout(5000);
-                        conn.setRequestMethod("GET");
-                        int code = conn.getResponseCode();
-                        Toast ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code,Toast.LENGTH_SHORT);
-                        ero.show();
-
-                        if(code==200){
-                            InputStream inStream = conn.getInputStream();
-                            ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-                            byte[] buffer = new byte[1024];
-                            int len = 0;
-                            while ((len = inStream.read(buffer)) != -1) {
-                                outStream.write(buffer, 0, len);
-                            }
-                            inStream.close();
-                            String res = new String(outStream.toByteArray(), "UTF-8");
-                            Log.d("GRAB", res);
-                        }
-
-                    } catch (Throwable e) {
-                        Toast ero = Toast.makeText(getApplicationContext(), "出戳啦\n" + e.toString(),Toast.LENGTH_SHORT);
-                        ero.show();
+                    int code = new HttpsRequest().CreateSimpleHttps(newURL);
+                    Toast ero;
+                    if(code!=-1){
+                        ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
+                    }else{
+                        ero = Toast.makeText(getApplicationContext(), "出戳啦\n", Toast.LENGTH_SHORT);
                     }
+                    ero.show();
                     Looper.loop();
                 }
             }).start();
