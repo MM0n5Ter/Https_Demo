@@ -62,9 +62,7 @@ public class MainActivity extends AppCompatActivity {
     class btnOkhttpClick implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
+            new Thread(() -> {
                     Looper.prepare();
                     int code = new HttpsRequest().CreateOkHttps(getURL());
                     Toast ero;
@@ -75,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                     ero.show();
                     Looper.loop();
-                }
             }).start();
         }
     }
