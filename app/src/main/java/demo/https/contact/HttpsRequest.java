@@ -6,7 +6,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -42,7 +48,18 @@ public class HttpsRequest {
     }
 
     public int CreateOkHttps(String path){
-        OkHttpClient client = new OkHttpClient();
+        MyTrustManager trustManager = new MyTrustManager();
+        SSLSocketFactory sslSocketFactory = null;
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[]{trustManager}, null);
+            sslSocketFactory = sslContext.getSocketFactory();
+        } catch (NoSuchAlgorithmException | KeyManagementException e){
+            Log.e("ERROR", e.toString());
+        }
+
+        assert sslSocketFactory != null;
+        OkHttpClient client = new OkHttpClient.Builder().sslSocketFactory(sslSocketFactory, trustManager).build();
         Request request = new Request.Builder()
                 .get().url("https://"+path).build();
         try{
@@ -56,3 +73,4 @@ public class HttpsRequest {
         }
     }
 }
+
