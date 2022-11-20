@@ -18,8 +18,6 @@ import java.security.cert.CertificateFactory;
 import java.util.Objects;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 import okhttp3.OkHttpClient;
