@@ -2,6 +2,7 @@ package demo.https.pinning;
 
 import demo.https.contact.*;
 import androidx.appcompat.app.AppCompatActivity;
+import android.content.Context;
 
 import android.os.Bundle;
 import android.os.Looper;
@@ -10,6 +11,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -45,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             new Thread(() -> {
                 Looper.prepare();
-                int code = new HttpsRequest().CreateSimpleHttps(getURL());
+                int code = new HttpsRequest(getApplicationContext()).CreateSimpleHttps(getURL());
                 Toast ero;
                 if(code!=-1){
                     ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
@@ -64,8 +71,15 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             new Thread(() -> {
                     Looper.prepare();
-                    int code = new HttpsRequest().CreateOkHttps(getURL());
-                    Toast ero;
+                int code = 0;
+                try {
+                    HttpsRequest tmp = new HttpsRequest(getApplicationContext());
+                    tmp.setId(R.raw.test);
+                    code = tmp.CreateOkHttps(getURL());
+                } catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException | KeyManagementException e) {
+                    e.printStackTrace();
+                }
+                Toast ero;
                     if(code!=-1){
                         ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
                     }else{

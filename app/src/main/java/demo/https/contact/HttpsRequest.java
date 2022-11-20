@@ -1,18 +1,26 @@
 package demo.https.contact;
 
 import android.util.Log;
+import android.content.Context;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.Objects;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -20,6 +28,15 @@ import okhttp3.Response;
 
 
 public class HttpsRequest {
+    Context context;
+    int Id;
+    public HttpsRequest(Context r){
+        this.context = r;
+    }
+
+    public void setId(int id){
+        Id = id;
+    }
 
     public int CreateSimpleHttps(String path){
         try{
@@ -47,19 +64,16 @@ public class HttpsRequest {
         }
     }
 
-    public int CreateOkHttps(String path){
-        MyTrustManager trustManager = new MyTrustManager();
-        SSLSocketFactory sslSocketFactory = null;
-        try {
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, new TrustManager[]{trustManager}, null);
-            sslSocketFactory = sslContext.getSocketFactory();
-        } catch (NoSuchAlgorithmException | KeyManagementException e){
-            Log.e("ERROR", e.toString());
-        }
+    public int CreateOkHttps(String path) throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException, KeyManagementException {
+        KeyStore keyStore = buildKeyStore(context, Id);
+        String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+        tmf.init(keyStore);
 
-        assert sslSocketFactory != null;
-        OkHttpClient client = new OkHttpClient.Builder().sslSocketFactory(sslSocketFactory, trustManager).build();
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tmf.getTrustManagers(), null);
+
+        OkHttpClient client = new OkHttpClient.Builder().build();
         Request request = new Request.Builder()
                 .get().url("https://"+path).build();
         try{
@@ -71,6 +85,36 @@ public class HttpsRequest {
             Log.e("ERROR", e.toString());
             return -1;
         }
+    }
+
+    private static KeyStore buildKeyStore(Context context, int certId) throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException {
+        // init a default key store
+        String keyStoreType = KeyStore.getDefaultType();
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+        keyStore.load(null, null);
+
+        // read and add certificate authority
+        Certificate cert = readCert(context, certId);
+        keyStore.setCertificateEntry("alter", cert);
+
+        return keyStore;
+    }
+
+
+    private static Certificate readCert(Context context,int certID) throws CertificateException, IOException {
+        InputStream CaInput = context.getResources().openRawResource(certID);
+
+        Certificate ca;
+        try {
+            // generate a certificate
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            ca = cf.generateCertificate(CaInput);
+        } finally {
+            CaInput.close();
+        }
+
+        return ca;
+
     }
 }
 
