@@ -47,7 +47,7 @@ public class HttpsRequest {
                 InputStream inStream = conn.getInputStream();
                 ByteArrayOutputStream outStream = new ByteArrayOutputStream();
                 byte[] buffer = new byte[1024];
-                int len = 0;
+                int len;
                 while ((len = inStream.read(buffer)) != -1) {
                     outStream.write(buffer, 0, len);
                 }
