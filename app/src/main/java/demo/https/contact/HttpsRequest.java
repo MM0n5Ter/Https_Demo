@@ -17,6 +17,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.Objects;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -36,10 +37,19 @@ public class HttpsRequest {
         Id = id;
     }
 
-    public int CreateSimpleHttps(String path){
+    public int CreateSimpleHttps(String path) throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException, KeyManagementException{
+        KeyStore keyStore = buildKeyStore(context, Id);
+        String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+        tmf.init(keyStore);
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, tmf.getTrustManagers(), null);
+
         try{
             URL url = new URL("https://"+path);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            HttpsURLConnection conn = (HttpsURLConnection)url.openConnection();
+            conn.setSSLSocketFactory(sslContext.getSocketFactory());
             conn.setConnectTimeout(5000);
             conn.setRequestMethod("GET");
             int code = conn.getResponseCode();
@@ -62,14 +72,7 @@ public class HttpsRequest {
         }
     }
 
-    public int CreateOkHttps(String path) throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException, KeyManagementException {
-        KeyStore keyStore = buildKeyStore(context, Id);
-        String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-        tmf.init(keyStore);
-
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, tmf.getTrustManagers(), null);
+    public int CreateOkHttps(String path) {
 
         OkHttpClient client = new OkHttpClient.Builder().build();
         Request request = new Request.Builder()

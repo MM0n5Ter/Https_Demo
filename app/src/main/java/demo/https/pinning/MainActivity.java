@@ -52,7 +52,14 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             new Thread(() -> {
                 Looper.prepare();
-                int code = new HttpsRequest(getApplicationContext()).CreateSimpleHttps(getURL());
+                int code = 0;
+                try {
+                    HttpsRequest tmp = new HttpsRequest(getApplicationContext());
+                    tmp.setId(R.raw.test);
+                    code = tmp.CreateSimpleHttps(getURL());
+                } catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException | KeyManagementException e) {
+                    e.printStackTrace();
+                }
                 Toast ero;
                 if(code!=-1){
                     ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
@@ -72,13 +79,9 @@ public class MainActivity extends AppCompatActivity {
             new Thread(() -> {
                     Looper.prepare();
                 int code = 0;
-                try {
-                    HttpsRequest tmp = new HttpsRequest(getApplicationContext());
-                    tmp.setId(R.raw.test);
-                    code = tmp.CreateOkHttps(getURL());
-                } catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException | KeyManagementException e) {
-                    e.printStackTrace();
-                }
+                HttpsRequest tmp = new HttpsRequest(getApplicationContext());
+                tmp.setId(R.raw.test);
+                code = tmp.CreateOkHttps(getURL());
                 Toast ero;
                     if(code!=-1){
                         ero = Toast.makeText(getApplicationContext(), "Connection Succeed!\nResponse Code:" + code, Toast.LENGTH_SHORT);
